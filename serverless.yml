@@ -15,5 +15,12 @@ functions:
           path: agendas
           method: get
 
+  createAgendamento:
+    handler: src/handlers/createAgendamento.handler
+    events:
+      - http:
+          path: agendamento
+          method: post
+
 plugins:
   - serverless-offline
