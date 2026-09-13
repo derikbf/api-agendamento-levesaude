@@ -5,7 +5,6 @@ import { InMemoryAgendaRepository } from '../repositories/inMemoryAgendaReposito
 import { InMemoryAgendamentoRepository } from '../repositories/inMemoryAgendamentoRepository';
 import { AgendamentoService } from '../services/agendamentoService';
 import { validateAgendamentoInput } from '../errors/agendamentoValidator';
-
 const agendaRepository = new InMemoryAgendaRepository();
 const agendamentoRepository = new InMemoryAgendamentoRepository();
 
@@ -15,9 +14,23 @@ const agendamentoService = new AgendamentoService(
 );
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  try {
-    const parsedBody: unknown = JSON.parse(event.body ?? '{}');
+  let parsedBody: unknown;
 
+  try {
+    parsedBody = JSON.parse(event.body ?? '{}');
+  } catch {
+    return {
+      statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        error: 'Payload deve ser um JSON válido.',
+      }),
+    };
+  }
+
+  try {
     const input = validateAgendamentoInput(parsedBody);
 
     const agendamento = agendamentoService.createAgendamento(input);
