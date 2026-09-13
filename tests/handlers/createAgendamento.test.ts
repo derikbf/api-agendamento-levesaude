@@ -7,9 +7,11 @@ describe('POST /agendamento handler', () => {
     const response = (await handler(
       {
         body: JSON.stringify({
-          medico_id: 1,
-          paciente: 'Dérik Barcellos',
-          data_horario: '2026-06-10 09:00',
+          agendamento: {
+            medico_id: 1,
+            paciente: 'Dérik Barcellos',
+            data_horario: '2026-06-10 09:00',
+          },
         }),
       } as never,
       {} as never,
@@ -17,25 +19,34 @@ describe('POST /agendamento handler', () => {
     )) as APIGatewayProxyResult;
 
     expect(response.statusCode).toBe(201);
-
     expect(response.headers).toEqual({
       'Content-Type': 'application/json',
     });
 
-    expect(JSON.parse(response.body)).toMatchObject({
-      medico_id: 1,
+    const body = JSON.parse(response.body);
+
+    expect(body.mensagem).toBe(
+      'Agendamento realizado com sucesso',
+    );
+
+    expect(body.agendamento).toMatchObject({
+      medico: 'Dr. João Silva',
       paciente: 'Dérik Barcellos',
       data_horario: '2026-06-10 09:00',
     });
+
+    expect(body.agendamento.id).toEqual(expect.any(String));
   });
 
   it('should return 409 when the schedule is already occupied', async () => {
     const firstResponse = (await handler(
       {
         body: JSON.stringify({
-          medico_id: 1,
-          paciente: 'Paciente 1',
-          data_horario: '2026-06-10 10:00',
+          agendamento: {
+            medico_id: 1,
+            paciente: 'Paciente 1',
+            data_horario: '2026-06-10 10:00',
+          },
         }),
       } as never,
       {} as never,
@@ -47,9 +58,11 @@ describe('POST /agendamento handler', () => {
     const secondResponse = (await handler(
       {
         body: JSON.stringify({
-          medico_id: 1,
-          paciente: 'Paciente 2',
-          data_horario: '2026-06-10 10:00',
+          agendamento: {
+            medico_id: 1,
+            paciente: 'Paciente 2',
+            data_horario: '2026-06-10 10:00',
+          },
         }),
       } as never,
       {} as never,
@@ -59,7 +72,9 @@ describe('POST /agendamento handler', () => {
     expect(secondResponse.statusCode).toBe(409);
 
     expect(JSON.parse(secondResponse.body)).toEqual({
-      error: 'Horário já está ocupado.',
+      erro: 'Horário indisponível',
+      mensagem:
+        'O horário solicitado não está mais disponível para este médico.',
     });
   });
 
@@ -67,8 +82,10 @@ describe('POST /agendamento handler', () => {
     const response = (await handler(
       {
         body: JSON.stringify({
-          paciente: 'Dérik Barcellos',
-          data_horario: '2026-06-10 11:00',
+          agendamento: {
+            paciente: 'Dérik Barcellos',
+            data_horario: '2026-06-10 11:00',
+          },
         }),
       } as never,
       {} as never,
@@ -86,9 +103,11 @@ describe('POST /agendamento handler', () => {
     const response = (await handler(
       {
         body: JSON.stringify({
-          medico_id: 1,
-          paciente: '',
-          data_horario: '2026-06-10 11:00',
+          agendamento: {
+            medico_id: 1,
+            paciente: '',
+            data_horario: '2026-06-10 11:00',
+          },
         }),
       } as never,
       {} as never,
@@ -106,8 +125,10 @@ describe('POST /agendamento handler', () => {
     const response = (await handler(
       {
         body: JSON.stringify({
-          medico_id: 1,
-          paciente: 'Dérik Barcellos',
+          agendamento: {
+            medico_id: 1,
+            paciente: 'Dérik Barcellos',
+          },
         }),
       } as never,
       {} as never,
@@ -125,9 +146,11 @@ describe('POST /agendamento handler', () => {
     const response = (await handler(
       {
         body: JSON.stringify({
-          medico_id: 999,
-          paciente: 'Dérik Barcellos',
-          data_horario: '2026-06-10 11:00',
+          agendamento: {
+            medico_id: 999,
+            paciente: 'Dérik Barcellos',
+            data_horario: '2026-06-10 11:00',
+          },
         }),
       } as never,
       {} as never,
@@ -145,9 +168,11 @@ describe('POST /agendamento handler', () => {
     const response = (await handler(
       {
         body: JSON.stringify({
-          medico_id: 1,
-          paciente: 'Dérik Barcellos',
-          data_horario: '2026-06-10 18:00',
+          agendamento: {
+            medico_id: 1,
+            paciente: 'Dérik Barcellos',
+            data_horario: '2026-06-10 18:00',
+          },
         }),
       } as never,
       {} as never,

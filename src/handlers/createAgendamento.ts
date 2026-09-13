@@ -1,10 +1,12 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 
 import { AppError } from '../errors/appError';
+import { HorarioOcupadoError } from '../errors/horarioOcupadoError';
 import { InMemoryAgendaRepository } from '../repositories/inMemoryAgendaRepository';
 import { InMemoryAgendamentoRepository } from '../repositories/inMemoryAgendamentoRepository';
 import { AgendamentoService } from '../services/agendamentoService';
 import { validateAgendamentoInput } from '../errors/agendamentoValidator';
+
 const agendaRepository = new InMemoryAgendaRepository();
 const agendamentoRepository = new InMemoryAgendamentoRepository();
 
@@ -33,16 +35,33 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   try {
     const input = validateAgendamentoInput(parsedBody);
 
-    const agendamento = agendamentoService.createAgendamento(input);
+    const agendamento =
+      agendamentoService.createAgendamento(input);
 
     return {
       statusCode: 201,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(agendamento),
+      body: JSON.stringify({
+        mensagem: 'Agendamento realizado com sucesso',
+        agendamento,
+      }),
     };
   } catch (error: unknown) {
+    if (error instanceof HorarioOcupadoError) {
+      return {
+        statusCode: error.statusCode,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          erro: 'Horário indisponível',
+          mensagem: error.message,
+        }),
+      };
+    }
+
     if (error instanceof AppError) {
       return {
         statusCode: error.statusCode,

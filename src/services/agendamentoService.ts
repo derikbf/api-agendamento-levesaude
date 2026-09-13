@@ -13,13 +13,22 @@ export interface CreateAgendamentoInput {
   data_horario: string;
 }
 
+export interface CreateAgendamentoResult {
+  id: string;
+  medico: string;
+  paciente: string;
+  data_horario: string;
+}
+
 export class AgendamentoService {
   constructor(
     private readonly agendaRepository: AgendaRepository,
     private readonly agendamentoRepository: AgendamentoRepository,
   ) {}
 
-  createAgendamento(input: CreateAgendamentoInput): Agendamento {
+  createAgendamento(
+    input: CreateAgendamentoInput,
+  ): CreateAgendamentoResult {
     const medicos = this.agendaRepository.findAll();
 
     const medico = medicos.find(
@@ -55,6 +64,14 @@ export class AgendamentoService {
       data_horario: input.data_horario,
     };
 
-    return this.agendamentoRepository.create(agendamento);
+    const agendamentoCriado =
+      this.agendamentoRepository.create(agendamento);
+
+    return {
+      id: agendamentoCriado.id,
+      medico: medico.nome,
+      paciente: agendamentoCriado.paciente,
+      data_horario: agendamentoCriado.data_horario,
+    };
   }
 }

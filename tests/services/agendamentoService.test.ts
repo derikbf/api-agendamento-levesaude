@@ -73,7 +73,7 @@ it('should allow the same schedule for different doctors', () => {
     data_horario: '2026-06-10 09:00',
   });
 
-  expect(result.medico_id).toBe(2);
+expect(result.medico).toBe('Dra. Maria Souza');
 
   expect(
     agendamentoRepository.findByMedicoAndHorario,
@@ -108,11 +108,11 @@ it('should allow the same schedule for different doctors', () => {
       data_horario: '2026-06-10 09:00',
     });
 
-    expect(result).toMatchObject({
-      medico_id: 1,
-      paciente: 'Dérik Barcellos',
-      data_horario: '2026-06-10 09:00',
-    });
+expect(result).toMatchObject({
+  medico: 'Dr. João Silva',
+  paciente: 'Dérik Barcellos',
+  data_horario: '2026-06-10 09:00',
+});
 
     expect(result.id).toEqual(expect.any(String));
 
@@ -152,7 +152,9 @@ it('should allow the same schedule for different doctors', () => {
         paciente: 'Dérik Barcellos',
         data_horario: '2026-06-10 09:00',
       }),
-    ).toThrow('Horário já está ocupado.');
+    ).toThrow(
+  'O horário solicitado não está mais disponível para este médico.',
+);
 
     expect(agendamentoRepository.create).not.toHaveBeenCalled();
   });

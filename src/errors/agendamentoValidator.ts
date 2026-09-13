@@ -8,7 +8,16 @@ export function validateAgendamentoInput(
     throw new ValidationError('Payload inválido.');
   }
 
-  const payload = input as Record<string, unknown>;
+  const request = input as Record<string, unknown>;
+
+  if (
+    typeof request.agendamento !== 'object' ||
+    request.agendamento === null
+  ) {
+    throw new ValidationError('agendamento é obrigatório.');
+  }
+
+  const payload = request.agendamento as Record<string, unknown>;
 
   if (
     typeof payload.medico_id !== 'number' ||

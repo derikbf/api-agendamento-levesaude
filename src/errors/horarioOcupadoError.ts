@@ -2,6 +2,9 @@ import { AppError } from './appError';
 
 export class HorarioOcupadoError extends AppError {
   constructor() {
-    super('Horário já está ocupado.', 409);
+    super(
+      'O horário solicitado não está mais disponível para este médico.',
+      409,
+    );
   }
 }
