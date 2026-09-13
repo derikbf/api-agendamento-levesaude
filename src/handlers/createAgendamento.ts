@@ -5,7 +5,7 @@ import { HorarioOcupadoError } from '../errors/horarioOcupadoError';
 import { InMemoryAgendaRepository } from '../repositories/inMemoryAgendaRepository';
 import { InMemoryAgendamentoRepository } from '../repositories/inMemoryAgendamentoRepository';
 import { AgendamentoService } from '../services/agendamentoService';
-import { validateAgendamentoInput } from '../errors/agendamentoValidator';
+import { validateAgendamentoInput } from '../validators/agendamentoValidator';
 
 const agendaRepository = new InMemoryAgendaRepository();
 const agendamentoRepository = new InMemoryAgendamentoRepository();
