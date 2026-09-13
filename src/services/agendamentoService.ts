@@ -3,6 +3,9 @@ import { randomUUID } from 'crypto';
 import { Agendamento } from '../models/agendamento';
 import { AgendaRepository } from '../repositories/agendaRepository';
 import { AgendamentoRepository } from '../repositories/agendamentoRepository';
+import { HorarioIndisponivelError } from '../errors/horarioIndisponivelError';
+import { HorarioOcupadoError } from '../errors/horarioOcupadoError';
+import { MedicoNaoEncontradoError } from '../errors/medicoNaoEncontradoError';
 
 export interface CreateAgendamentoInput {
   medico_id: number;
@@ -24,7 +27,7 @@ export class AgendamentoService {
     );
 
     if (!medico) {
-      throw new Error('Médico não encontrado.');
+      throw new MedicoNaoEncontradoError();
     }
 
     const horarioDisponivel = medico.horarios_disponiveis.includes(
@@ -32,7 +35,7 @@ export class AgendamentoService {
     );
 
     if (!horarioDisponivel) {
-      throw new Error('Horário não disponível para este médico.');
+      throw new HorarioIndisponivelError();
     }
 
     const agendamentoExistente =
@@ -42,7 +45,7 @@ export class AgendamentoService {
       );
 
     if (agendamentoExistente) {
-      throw new Error('Horário já está ocupado.');
+      throw new HorarioOcupadoError();
     }
 
     const agendamento: Agendamento = {

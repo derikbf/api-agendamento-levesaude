@@ -1,11 +1,10 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 
+import { AppError } from '../errors/appError';
 import { InMemoryAgendaRepository } from '../repositories/inMemoryAgendaRepository';
 import { InMemoryAgendamentoRepository } from '../repositories/inMemoryAgendamentoRepository';
-import {
-  AgendamentoService,
-  CreateAgendamentoInput,
-} from '../services/agendamentoService';
+import { AgendamentoService } from '../services/agendamentoService';
+import { validateAgendamentoInput } from '../errors/agendamentoValidator';
 
 const agendaRepository = new InMemoryAgendaRepository();
 const agendamentoRepository = new InMemoryAgendamentoRepository();
@@ -16,15 +15,41 @@ const agendamentoService = new AgendamentoService(
 );
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  const input = JSON.parse(event.body ?? '{}') as CreateAgendamentoInput;
+  try {
+    const parsedBody: unknown = JSON.parse(event.body ?? '{}');
 
-  const agendamento = agendamentoService.createAgendamento(input);
+    const input = validateAgendamentoInput(parsedBody);
 
-  return {
-    statusCode: 201,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(agendamento),
-  };
+    const agendamento = agendamentoService.createAgendamento(input);
+
+    return {
+      statusCode: 201,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(agendamento),
+    };
+  } catch (error: unknown) {
+    if (error instanceof AppError) {
+      return {
+        statusCode: error.statusCode,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          error: error.message,
+        }),
+      };
+    }
+
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        error: 'Erro interno do servidor.',
+      }),
+    };
+  }
 };
