@@ -3,6 +3,83 @@ import { AgendamentoRepository } from '../../src/repositories/agendamentoReposit
 import { AgendamentoService } from '../../src/services/agendamentoService';
 
 describe('AgendamentoService', () => {
+
+  it('should check whether the requested schedule is already occupied', () => {
+  const agendaRepository: AgendaRepository = {
+    findAll: jest.fn().mockReturnValue([
+      {
+        id: 1,
+        nome: 'Dr. João Silva',
+        especialidade: 'Cardiologista',
+        horarios_disponiveis: ['2026-06-10 09:00'],
+      },
+    ]),
+  };
+
+  const agendamentoRepository: AgendamentoRepository = {
+    findByMedicoAndHorario: jest.fn().mockReturnValue(undefined),
+    create: jest.fn((agendamento) => agendamento),
+  };
+
+  const service = new AgendamentoService(
+    agendaRepository,
+    agendamentoRepository,
+  );
+
+  service.createAgendamento({
+    medico_id: 1,
+    paciente: 'Dérik Barcellos',
+    data_horario: '2026-06-10 09:00',
+  });
+
+  expect(
+    agendamentoRepository.findByMedicoAndHorario,
+  ).toHaveBeenCalledWith(1, '2026-06-10 09:00');
+
+  expect(agendamentoRepository.create).toHaveBeenCalledTimes(1);
+});
+
+it('should allow the same schedule for different doctors', () => {
+  const agendaRepository: AgendaRepository = {
+    findAll: jest.fn().mockReturnValue([
+      {
+        id: 1,
+        nome: 'Dr. João Silva',
+        especialidade: 'Cardiologista',
+        horarios_disponiveis: ['2026-06-10 09:00'],
+      },
+      {
+        id: 2,
+        nome: 'Dra. Maria Souza',
+        especialidade: 'Dermatologista',
+        horarios_disponiveis: ['2026-06-10 09:00'],
+      },
+    ]),
+  };
+
+  const agendamentoRepository: AgendamentoRepository = {
+    findByMedicoAndHorario: jest.fn().mockReturnValue(undefined),
+    create: jest.fn((agendamento) => agendamento),
+  };
+
+  const service = new AgendamentoService(
+    agendaRepository,
+    agendamentoRepository,
+  );
+
+  const result = service.createAgendamento({
+    medico_id: 2,
+    paciente: 'Dérik Barcellos',
+    data_horario: '2026-06-10 09:00',
+  });
+
+  expect(result.medico_id).toBe(2);
+
+  expect(
+    agendamentoRepository.findByMedicoAndHorario,
+  ).toHaveBeenCalledWith(2, '2026-06-10 09:00');
+});
+
   it('should create an appointment for an available schedule', () => {
     const agendaRepository: AgendaRepository = {
       findAll: jest.fn().mockReturnValue([
