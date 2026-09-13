@@ -1,0 +1,19 @@
+service: api-agendamento-levesaude
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+
+functions:
+  getAgendas:
+    handler: src/handlers/getAgendas.handler
+    events:
+      - http:
+          path: agendas
+          method: get
+
+plugins:
+  - serverless-offline
